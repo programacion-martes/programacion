@@ -42,5 +42,6 @@ if (isset($_POST['login'])) {
     
     <br>
     <a href="index.php">Registrarse</a>
+
 </body>
 </html>
