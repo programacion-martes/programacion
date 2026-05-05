@@ -69,5 +69,41 @@ class cliente {
         $resultado = $stmt->get_result();
         return $resultado->fetch_assoc();
     }
+
+    public function actualizar() {
+    $con = DB::conectar();
+    $sql = "UPDATE clientes SET documento = ?, numerodocumento = ?, nombre = ?, apellido = ?, telefono = ?, direccion = ? WHERE id = ?";
+    $stmt = $con->prepare($sql);
+    $stmt->bind_param("ssssssi", 
+        $this->documento, 
+        $this->numeroDocumento, 
+        $this->nombre, 
+        $this->apellido, 
+        $this->telefono, 
+        $this->direccion,
+        $this->id
+    );
+    $stmt->execute();
+    $stmt->close();
 }
+
+public function eliminar() {
+    $con = DB::conectar();
+    $sql = "DELETE FROM clientes WHERE id = ?";
+    $stmt = $con->prepare($sql);
+    $stmt->bind_param("i", $this->id);
+    $stmt->execute();
+    $stmt->close();
+}
+
+public function obtenerTodos() {
+    $con = DB::conectar();
+    $sql = "SELECT * FROM clientes ORDER BY apellido ASC, nombre ASC";
+    $resultado = $con->query($sql);
+    return $resultado;
+}
+}
+
+
+
 ?>

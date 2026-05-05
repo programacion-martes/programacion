@@ -40,9 +40,9 @@ if (isset($_POST['login'])) {
         <label>Contraseña:</label><br>
         <input type="password" name="contraseña" required><br><br>
         <button type="submit" name="login">Ingresar</button>
-
-        <a class="btn-form" href="registro.php">¿No tienes cuenta? Regístrate aquí</a>
     </form>
     <br>
+
+    <script src="assets/js/validaciones.js"></script>
 </body>
 </html>

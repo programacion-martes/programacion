@@ -1,12 +1,13 @@
 <?php
 session_start();
-require_once("class/usuario.php");
-require_once("class/TokenAntiCSRF.php");
 
-if (isset($_SESSION['usuario_id'])) {
-    header("Location: dashboard.php");
+if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_rol'] != 1) {
+    header("Location: index.php");
     exit();
 }
+
+require_once("class/usuario.php");
+require_once("class/TokenAntiCSRF.php");
 
 $token = TokenAntiCSRF::generarToken();
 ?>
@@ -21,18 +22,27 @@ $token = TokenAntiCSRF::generarToken();
     
     <form action="procesar.php" method="post">
         
-    <h2>Registrar Usuario</h2>
-    
-    <input type="hidden" name="token" value="<?php echo $token; ?>">
-        <label>Usuario:</label><br>
-        <input type="text" name="usuario" required><br><br>
-        <label>Contraseña:</label><br>
-        <input type="password" name="contraseña" required><br><br>
+        <h2>Registrar Usuario</h2>
+        
+        <input type="hidden" name="token" value="<?php echo $token; ?>">
+        
+        <label>Usuario:</label>
+        <input type="text" name="usuario" required>
+        
+        <label>Contraseña:</label>
+        <input type="password" name="contraseña" required>
+        
+        <label>Rol:</label>
+        <select name="rol">
+            <option value="1">Admin</option>
+            <option value="0" selected>Vendedor</option>
+        </select>
+        
         <button type="submit" name="enviar">Registrar</button>
         
         <a href="index.php">¿Ya tienes cuenta? Inicia sesión aquí</a>
     </form>
-    
-    <br>
+
+    <script src="assets/js/validaciones.js"></script>
 </body>
 </html>

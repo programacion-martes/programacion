@@ -5,6 +5,7 @@ class producto {
     protected $id;
     protected $categoria_productoid;
     protected $producto;
+    protected $stock;
 
     public function setId($id) {
         $this->id = $id;
@@ -16,6 +17,10 @@ class producto {
     
     public function setProducto($producto) {
         $this->producto = $producto;
+    }
+
+    public function setStock($stock) {
+        $this->stock = $stock;
     }
 
     public function getId() {
@@ -30,18 +35,22 @@ class producto {
         return $this->producto;
     }
 
+    public function getStock() {
+        return $this->stock;
+    }
+
     public function guardar() {
         $con = DB::conectar();
-        $sql = "INSERT INTO productos(categoria_productoid, nombre_producto) VALUES(?, ?)";
+        $sql = "INSERT INTO productos(categoria_productoid, nombre_producto, stock) VALUES(?, ?, ?)";
         $stmt = $con->prepare($sql);
-        $stmt->bind_param("is", $this->categoria_productoid, $this->producto);
+        $stmt->bind_param("isi", $this->categoria_productoid, $this->producto, $this->stock);
         $stmt->execute();
         $stmt->close();
     }
 
     public static function listar() {
         $con = DB::conectar();
-        $sql = "SELECT p.id, p.nombre_producto, c.nombre_categoria 
+        $sql = "SELECT p.id, p.nombre_producto, p.stock, c.nombre_categoria 
                 FROM productos p 
                 JOIN categorias_productos c ON p.categoria_productoid = c.id";
         $resultado = $con->query($sql);
@@ -60,9 +69,9 @@ class producto {
 
     public function actualizar() {
         $con = DB::conectar();
-        $sql = "UPDATE productos SET categoria_productoid = ?, nombre_producto = ? WHERE id = ?";
+        $sql = "UPDATE productos SET categoria_productoid = ?, nombre_producto = ?, stock = ? WHERE id = ?";
         $stmt = $con->prepare($sql);
-        $stmt->bind_param("isi", $this->categoria_productoid, $this->producto, $this->id);
+        $stmt->bind_param("isii", $this->categoria_productoid, $this->producto, $this->stock, $this->id);
         $stmt->execute();
         $stmt->close();
     }
