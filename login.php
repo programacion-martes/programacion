@@ -20,7 +20,6 @@ if (isset($_POST['login'])) {
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -30,19 +29,14 @@ if (isset($_POST['login'])) {
 </head>
 <body>
     <h2>Iniciar Sesión</h2>
-
     <form method="POST" action="">
         <label>Usuario:</label><br>
         <input type="text" name="usuario" required><br><br>
-        
         <label>Contraseña:</label><br>
         <input type="password" name="contraseña" required><br><br>
-        
         <button type="submit" name="login">Ingresar</button>
     </form>
-    
     <br>
-    <a href="index.php">Registrarse</a>
-
+    <a href="registro.php">Registrarse</a>
 </body>
 </html>
