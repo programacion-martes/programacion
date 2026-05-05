@@ -28,18 +28,21 @@ if (isset($_POST['login'])) {
     <link rel="stylesheet" href="assets/css/app.css">
 </head>
 <body>
-    <h2>Iniciar Sesión</h2>
+
     
     <?php if (isset($error)) echo "<p style='color:red;'>$error</p>"; ?>
     
     <form method="POST" action="">
+        <h1>Iniciar Sesión</h1>
+
         <label>Usuario:</label><br>
         <input type="text" name="usuario" required><br><br>
         <label>Contraseña:</label><br>
         <input type="password" name="contraseña" required><br><br>
         <button type="submit" name="login">Ingresar</button>
+
+        <a class="btn-form" href="registro.php">¿No tienes cuenta? Regístrate aquí</a>
     </form>
     <br>
-    <a href="registro.php">¿No tienes cuenta? Regístrate aquí</a>
 </body>
 </html>

@@ -18,7 +18,7 @@ if (isset($_POST["enviar"])) {
     $usuario->setContraseña($_POST["contraseña"]);
     if ($usuario->guardar()) {
         TokenAntiCSRF::generarToken();
-        echo 'Usuario registrado correctamente.<br><a href="login.php">Ir al Login</a>';
+        echo 'Usuario registrado correctamente.<br><a href="index.php">Ir al Login</a>';
     } else {
         echo 'El usuario ya existe.<br><a href="index.php">Volver</a>';
     }
