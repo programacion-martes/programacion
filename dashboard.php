@@ -50,8 +50,19 @@ if (isset($_GET['editar'])) {
     <link rel="stylesheet" href="assets/css/app.css">
 </head>
 <body>
+   
+
+    <!-- Al inicio, después del <body> -->
+<body>
+<div class="container">
     <h1>Bienvenido <?php echo $_SESSION['usuario_nombre']; ?></h1>
-    <a href="logout.php">Cerrar Sesión</a>
+    <a href="logout.php" class="logout-btn">Cerrar Sesión</a>
+    
+    <!-- resto de tu contenido -->
+    
+</div>
+</body>
+
     
     <h2><?php echo $producto_editar ? 'Editar Producto' : 'Agregar Producto'; ?></h2>
     <form action="procesar.php" method="post">
