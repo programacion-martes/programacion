@@ -10,6 +10,7 @@ $token = TokenAntiCSRF::generarToken();
 <head>
     <meta charset="UTF-8">
     <title>Registro - Sistema de Ventas</title>
+     <link rel="stylesheet" href="assets/css/app.css">
 </head>
 <body>
     <h2>Registrar Usuario</h2>
