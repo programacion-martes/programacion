@@ -44,12 +44,12 @@ form:has(input[name="categoria"]) {
 h1, h2, h3 {
     text-align: center;
     margin-bottom: 20px;
-    color: #2d3748;
+    color: #000000;
 }
 
 h1 {
     font-size: 2.2rem;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #14151d, #09050e);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
