@@ -26,7 +26,6 @@ if (isset($_POST['login'])) {
 <head>
     <meta charset="UTF-8">
     <title>Login - Sistema de Ventas</title>
-     <link rel="stylesheet" href="assets/css/app.css">
 </head>
 <body>
     <h2>Iniciar Sesión</h2>
