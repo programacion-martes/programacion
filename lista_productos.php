@@ -53,7 +53,7 @@ $busqueda = isset($_GET['buscar']) ? $_GET['buscar'] : '';
                     <input type="text" name="buscar" placeholder="Buscar producto..." value="<?php echo htmlspecialchars($busqueda); ?>">
                     <button type="submit">Buscar</button>
                 </div>
-                
+            </form>
         </div>
 
             <?php if (!empty($busqueda)): ?>
@@ -62,7 +62,6 @@ $busqueda = isset($_GET['buscar']) ? $_GET['buscar'] : '';
                     <a href="lista_productos.php">[Limpiar]</a>
                 </p>
             <?php endif; ?>
-        </form>
 
         <?php
         $con = DB::conectar();
@@ -81,22 +80,18 @@ $busqueda = isset($_GET['buscar']) ? $_GET['buscar'] : '';
             
             if ($resultado->num_rows > 0) {
                 echo "<table>";
-echo "<tr><th>Producto</th><th>Categoría</th><th>Stock</th><th>Precio</th><th>IVA</th><th>Total</th><th>Acciones</th></tr>";                
+                echo "<tr><th>Producto</th><th>Categoría</th><th>Stock</th><th>Precio</th><th>Acciones</th></tr>";                
                 while ($prod = $resultado->fetch_assoc()) {
                     $precio_obj = new precios();
                     $precio_obj->setProductoid($prod['id']);
                     $precio_data = $precio_obj->obtenerPorProductoId();
                     $precio_mostrar = $precio_data ? $precio_data['precio'] : '0';
-                    $iva_mostrar = $precio_data ? $precio_data['iva'] : '0';
-                    $total = $precio_mostrar + ($precio_mostrar * $iva_mostrar / 100);
                     
                     echo "<tr>";
                     echo "<td>" . $prod['nombre_producto'] . "</td>";
                     echo "<td>" . $prod['nombre_categoria'] . "</td>";
                     echo "<td>" . $prod['stock'] . "</td>";
                     echo "<td>$" . $precio_mostrar . "</td>";
-                    echo "<td>" . $iva_mostrar . "%</td>";
-                    echo "<td>$" . number_format($total, 2) . "</td>";
                     echo "<td>";
                     echo "<a href='agregar_producto.php?editar=" . $prod['id'] . "'>Editar</a> ";
                     echo "<a href='procesar.php?eliminar=" . $prod['id'] . "' onclick='return confirm(\"Eliminar producto?\")'>Eliminar</a>";
@@ -109,7 +104,7 @@ echo "<tr><th>Producto</th><th>Categoría</th><th>Stock</th><th>Precio</th><th>I
             }
             $stmt->close();
         } else {
-            $sql = "SELECT * FROM categorias_productos ORDER BY nombre_categoria ASC LIMIT 5";
+            $sql = "SELECT * FROM categorias_productos ORDER BY nombre_categoria ASC";
             $categorias = $con->query($sql);
             $hay_productos = false;
             
@@ -125,22 +120,18 @@ echo "<tr><th>Producto</th><th>Categoría</th><th>Stock</th><th>Precio</th><th>I
                         $hay_productos = true;
                         echo "<h3>" . $cat['nombre_categoria'] . "</h3>";
                         echo "<table>";
-                        echo "<tr><th>Producto</th><th>Stock</th><th>Precio</th><th>IVA</th><th>Total</th><th>Acciones</th></tr>";
+                        echo "<tr><th>Producto</th><th>Stock</th><th>Precio</th><th>Acciones</th></tr>";
                         
                         while ($prod = $productos_cat->fetch_assoc()) {
                             $precio_obj = new precios();
                             $precio_obj->setProductoid($prod['id']);
                             $precio_data = $precio_obj->obtenerPorProductoId();
                             $precio_mostrar = $precio_data ? $precio_data['precio'] : '0';
-                            $iva_mostrar = $precio_data ? $precio_data['iva'] : '0';
-                            $total = $precio_mostrar + ($precio_mostrar * $iva_mostrar / 100);
                             
                             echo "<tr>";
                             echo "<td>" . $prod['nombre_producto'] . "</td>";
                             echo "<td>" . $prod['stock'] . "</td>";
                             echo "<td>$" . $precio_mostrar . "</td>";
-                            echo "<td>" . $iva_mostrar . "%</td>";
-                            echo "<td>$" . number_format($total, 2) . "</td>";
                             echo "<td>";
                             echo "<a href='agregar_producto.php?editar=" . $prod['id'] . "'>Editar</a> ";
                             echo "<a href='procesar.php?eliminar=" . $prod['id'] . "' onclick='return confirm(\"Eliminar producto?\")'>Eliminar</a>";

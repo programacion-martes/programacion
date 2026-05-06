@@ -7,6 +7,7 @@ if (!isset($_SESSION['usuario_id'])) {
 
 require_once("class/DB.php");
 require_once("class/cliente.php");
+require_once("class/iva.php");
 
 $cliente_encontrado = null;
 $mensaje = '';
@@ -46,6 +47,9 @@ if (isset($_POST['buscar_cliente'])) {
         $mensaje = "Cliente no encontrado. <a href='agregar_cliente.php?cedula=" . $_POST['buscar_cedula'] . "'>Registrarlo aquí</a>";
     }
 }
+
+$iva_actual = iva::obtenerActual();
+$porcentaje_iva = $iva_actual ? $iva_actual['porcentaje'] : 16;
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -95,6 +99,7 @@ if (isset($_POST['buscar_cliente'])) {
         <form action="procesar.php" method="post" class="form-venta" id="form-venta">
             <input type="hidden" name="cliente_id" value="<?php echo $cliente_encontrado['id']; ?>">
             <input type="hidden" name="total_venta" id="total_venta_input" value="0">
+            <input type="hidden" name="porcentaje_iva" id="porcentaje_iva_input" value="<?php echo $porcentaje_iva; ?>">
 
             <div class="venta-header">
                 <span><strong>Cliente:</strong> <?php echo $cliente_encontrado['nombre'] . " " . $cliente_encontrado['apellido']; ?></span>
@@ -107,32 +112,33 @@ if (isset($_POST['buscar_cliente'])) {
                 <p><strong>Dirección:</strong> <?php echo $cliente_encontrado['direccion']; ?></p>
             </div>
 
+            <div class="datos-cliente">
+                <label><strong>IVA de esta venta (%):</strong></label>
+                <input type="number" step="0.01" id="iva-porcentaje" value="<?php echo $porcentaje_iva; ?>" min="0" max="100" style="width:100px; display:inline-block;">
+            </div>
+
             <h3>Productos disponibles:</h3>
 
             <input type="text" id="filtro-productos" placeholder="Filtrar productos..." autocomplete="off">
 
             <?php
             $con = DB::conectar();
-            $sql = "SELECT p.id, p.nombre_producto, p.stock, pr.precio, pr.iva 
+            $sql = "SELECT p.id, p.nombre_producto, p.stock, pr.precio 
                     FROM productos p 
                     JOIN precios pr ON p.id = pr.productoid 
-                    ORDER BY p.nombre_producto ASC
-                    LIMIT 5";
+                    ORDER BY p.nombre_producto ASC";
             $productos_lista = $con->query($sql);
 
             if ($productos_lista->num_rows > 0) {
                 echo "<table id='tabla-productos'>";
-                echo "<thead><tr><th>Producto</th><th>Stock</th><th>Precio</th><th>IVA</th><th>Total Unit.</th><th>Cantidad</th><th>Subtotal</th></tr></thead>";
+                echo "<thead><tr><th>Producto</th><th>Stock</th><th>Precio</th><th>Cantidad</th><th>Subtotal</th></tr></thead>";
                 echo "<tbody>";
                 while ($prod = $productos_lista->fetch_assoc()) {
-                    $total_prod = $prod['precio'] + ($prod['precio'] * $prod['iva'] / 100);
                     echo "<tr class='producto-fila' data-nombre='" . htmlspecialchars($prod['nombre_producto']) . "'>";
                     echo "<td>" . $prod['nombre_producto'] . "</td>";
                     echo "<td>" . $prod['stock'] . "</td>";
                     echo "<td>$" . $prod['precio'] . "</td>";
-                    echo "<td>" . $prod['iva'] . "%</td>";
-                    echo "<td>$" . number_format($total_prod, 2) . "</td>";
-                    echo "<td><input type='number' name='cantidad[" . $prod['id'] . "]' value='0' min='0' max='" . $prod['stock'] . "' class='cantidad-input' data-precio='" . $prod['precio'] . "' data-iva='" . $prod['iva'] . "'></td>";
+                    echo "<td><input type='number' name='cantidad[" . $prod['id'] . "]' value='0' min='0' max='" . $prod['stock'] . "' class='cantidad-input' data-precio='" . $prod['precio'] . "'></td>";
                     echo "<td class='subtotal-producto'>$0.00</td>";
                     echo "</tr>";
                 }
@@ -140,6 +146,8 @@ if (isset($_POST['buscar_cliente'])) {
                 echo "</table>";
 
                 echo "<div class='total-venta-box'>";
+                echo "<strong>Subtotal: </strong><span id='subtotal-venta'>$0.00</span><br>";
+                echo "<strong>IVA (<span id='iva-porcentaje-txt'><?php echo $porcentaje_iva; ?></span>%): </strong><span id='iva-venta'>$0.00</span><br>";
                 echo "<strong>Total: </strong><span id='total-venta'>$0.00</span>";
                 echo "</div>";
             } else {
@@ -179,17 +187,16 @@ if (isset($_POST['buscar_cliente'])) {
         }
 
         function calcularTotalVenta() {
-            let totalGeneral = 0;
+            let subtotalGeneral = 0;
+            let porcentajeIva = parseFloat(document.getElementById('iva-porcentaje').value) || 0;
             
             document.querySelectorAll('.cantidad-input').forEach(function(input) {
                 let cantidad = parseInt(input.value) || 0;
                 let precio = parseFloat(input.getAttribute('data-precio'));
-                let iva = parseFloat(input.getAttribute('data-iva'));
                 
                 if (cantidad > 0) {
-                    let totalUnitario = precio + (precio * iva / 100);
-                    let subtotal = totalUnitario * cantidad;
-                    totalGeneral += subtotal;
+                    let subtotal = precio * cantidad;
+                    subtotalGeneral += subtotal;
                     
                     let fila = input.closest('tr');
                     let celdaSubtotal = fila.querySelector('.subtotal-producto');
@@ -205,9 +212,18 @@ if (isset($_POST['buscar_cliente'])) {
                 }
             });
             
+            let ivaTotal = subtotalGeneral * porcentajeIva / 100;
+            let totalGeneral = subtotalGeneral + ivaTotal;
+            
+            document.getElementById('iva-porcentaje-txt').textContent = porcentajeIva;
+            document.getElementById('subtotal-venta').textContent = '$' + subtotalGeneral.toFixed(2);
+            document.getElementById('iva-venta').textContent = '$' + ivaTotal.toFixed(2);
             document.getElementById('total-venta').textContent = '$' + totalGeneral.toFixed(2);
             document.getElementById('total_venta_input').value = totalGeneral.toFixed(2);
+            document.getElementById('porcentaje_iva_input').value = porcentajeIva;
         }
+
+        document.getElementById('iva-porcentaje').addEventListener('input', calcularTotalVenta);
 
         document.querySelectorAll('.cantidad-input').forEach(function(input) {
             input.addEventListener('input', calcularTotalVenta);

@@ -5,7 +5,6 @@ class precios {
     protected $id;
     protected $productoid;
     protected $precio;
-    protected $iva;
 
     public function setId($id) {
         $this->id = $id;
@@ -17,10 +16,6 @@ class precios {
     
     public function setPrecio($precio) {
         $this->precio = $precio;
-    }
-    
-    public function setIva($iva) {
-        $this->iva = $iva;
     }
 
     public function getId() {
@@ -34,16 +29,12 @@ class precios {
     public function getPrecio() {
         return $this->precio;
     }
-    
-    public function getIva() {
-        return $this->iva;
-    }
 
     public function guardar() {
         $con = DB::conectar();
-        $sql = "INSERT INTO precios(productoid, precio, iva) VALUES(?, ?, ?)";
+        $sql = "INSERT INTO precios(productoid, precio) VALUES(?, ?)";
         $stmt = $con->prepare($sql);
-        $stmt->bind_param("idd", $this->productoid, $this->precio, $this->iva);
+        $stmt->bind_param("id", $this->productoid, $this->precio);
         $stmt->execute();
         $stmt->close();
     }
@@ -60,9 +51,9 @@ class precios {
 
     public function actualizar() {
         $con = DB::conectar();
-        $sql = "UPDATE precios SET precio = ?, iva = ? WHERE id = ?";
+        $sql = "UPDATE precios SET precio = ? WHERE id = ?";
         $stmt = $con->prepare($sql);
-        $stmt->bind_param("ddi", $this->precio, $this->iva, $this->id);
+        $stmt->bind_param("di", $this->precio, $this->id);
         $stmt->execute();
         $stmt->close();
     }

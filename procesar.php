@@ -6,6 +6,7 @@ require_once("class/productos.php");
 require_once("class/categorias_productos.php");
 require_once("class/precios.php");
 require_once("class/cliente.php");
+require_once("class/iva.php");
 
 if (isset($_POST["enviar"])) {
     if (!TokenAntiCSRF::validarToken($_POST['token'])) {
@@ -17,10 +18,10 @@ if (isset($_POST["enviar"])) {
         </div></div></body></html>';
         exit();
     }
-$usuario = new usuarios();
-$usuario->setUsuario($_POST["usuario"]);
-$usuario->setContraseña($_POST["contraseña"]);
-$usuario->setRol(isset($_POST["rol"]) ? $_POST["rol"] : 0);
+    $usuario = new usuarios();
+    $usuario->setUsuario($_POST["usuario"]);
+    $usuario->setContraseña($_POST["contraseña"]);
+    $usuario->setRol(isset($_POST["rol"]) ? $_POST["rol"] : 0);
     if ($usuario->guardar()) {
         TokenAntiCSRF::generarToken();
         echo '<!DOCTYPE html>
@@ -44,10 +45,16 @@ if (isset($_POST['guardar_venta'])) {
     $con = DB::conectar();
     
     $cliente_id = $_POST['cliente_id'];
+    $porcentaje_iva = isset($_POST['porcentaje_iva']) ? $_POST['porcentaje_iva'] : 16;
     
-    $sql = "INSERT INTO ventas (clienteid, fecha) VALUES (?, NOW())";
+    // Guardar el IVA usado en esta venta
+    $iva = new iva();
+    $iva->setPorcentaje($porcentaje_iva);
+    $iva_id = $iva->guardar();
+    
+    $sql = "INSERT INTO ventas (clienteid, iva_id, fecha) VALUES (?, ?, NOW())";
     $stmt = $con->prepare($sql);
-    $stmt->bind_param("i", $cliente_id);
+    $stmt->bind_param("ii", $cliente_id, $iva_id);
     $stmt->execute();
     $venta_id = $stmt->insert_id;
     $stmt->close();
@@ -80,7 +87,6 @@ if (isset($_POST['guardar_venta'])) {
         }
     }
     
-    
     header("Location: dashboard.php");
     exit();
 }
@@ -102,7 +108,6 @@ if (isset($_POST["guardar_producto"])) {
     $precio = new precios();
     $precio->setProductoid($producto_id);
     $precio->setPrecio($_POST["precio"]);
-    $precio->setIva($_POST["iva"]);
     $precio->guardar();
     
     header("Location: lista_productos.php");
@@ -129,11 +134,9 @@ if (isset($_POST["actualizar_producto"])) {
     if ($precio_existente) {
         $precio_obj->setId($precio_existente['id']);
         $precio_obj->setPrecio($_POST["precio"]);
-        $precio_obj->setIva($_POST["iva"]);
         $precio_obj->actualizar();
     } else {
         $precio_obj->setPrecio($_POST["precio"]);
-        $precio_obj->setIva($_POST["iva"]);
         $precio_obj->guardar();
     }
     
@@ -253,13 +256,31 @@ if (isset($_GET['eliminar_detalle'])) {
     exit();
 }
 
-
 if (isset($_GET['cambiar_rol'])) {
     $usuario = new usuarios();
     $usuario->setId($_GET['cambiar_rol']);
     $usuario->setRol($_GET['rol']);
     $usuario->actualizarRol();
     header("Location: usuarios.php");
+    exit();
+}
+
+// GUARDAR NUEVO IVA
+if (isset($_POST['guardar_iva'])) {
+    $iva = new iva();
+    $iva->setPorcentaje($_POST['porcentaje']);
+    $iva->guardar();
+    header("Location: dashboard.php?iva=ok");
+    exit();
+}
+
+// ACTUALIZAR IVA
+if (isset($_POST['actualizar_iva'])) {
+    $iva = new iva();
+    $iva->setId($_POST['id']);
+    $iva->setPorcentaje($_POST['porcentaje']);
+    $iva->actualizar();
+    header("Location: dashboard.php?iva=ok");
     exit();
 }
 

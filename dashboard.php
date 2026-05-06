@@ -12,6 +12,7 @@ if ($_SESSION['usuario_rol'] != 1) {
 }
 
 require_once("class/DB.php");
+require_once("class/iva.php");
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -42,20 +43,20 @@ require_once("class/DB.php");
     </div>
 </div>
 
-
     <div class="main">
         <h1>Dashboard</h1>
 
         <?php
         $con = DB::conectar();
         
-            $sql_total_vendido_hoy = "SELECT ROUND(SUM(pr.precio + (pr.precio * pr.iva / 100)), 2) as total 
-                                    FROM detalles_ventas dv 
-                                    JOIN precios pr ON dv.precioid = pr.id 
-                                    JOIN ventas v ON dv.ventaid = v.id 
-                                    WHERE DATE(v.fecha) = CURDATE()";
-            $total_vendido_hoy = $con->query($sql_total_vendido_hoy)->fetch_assoc()['total'];
-            $total_vendido_hoy = $total_vendido_hoy ? $total_vendido_hoy : 0;
+        $sql_total_vendido_hoy = "SELECT ROUND(SUM(pr.precio + (pr.precio * COALESCE(i.porcentaje, 16) / 100)), 2) as total 
+                                  FROM detalles_ventas dv 
+                                  JOIN precios pr ON dv.precioid = pr.id 
+                                  JOIN ventas v ON dv.ventaid = v.id 
+                                  LEFT JOIN iva i ON v.iva_id = i.id 
+                                  WHERE DATE(v.fecha) = CURDATE()";
+        $total_vendido_hoy = $con->query($sql_total_vendido_hoy)->fetch_assoc()['total'];
+        $total_vendido_hoy = $total_vendido_hoy ? $total_vendido_hoy : 0;
                         
         $sql_total_hoy = "SELECT COUNT(*) as total FROM ventas WHERE DATE(fecha) = CURDATE()";
         $total_hoy = $con->query($sql_total_hoy)->fetch_assoc()['total'];
@@ -89,10 +90,10 @@ require_once("class/DB.php");
         <h2>Últimas Ventas</h2>
 
         <?php
-        $sql = "SELECT v.id as venta_id, v.fecha, c.nombre, c.apellido, c.numerodocumento 
+        $sql = "SELECT v.id as venta_id, v.fecha, c.nombre, c.apellido, c.documento, c.numerodocumento 
                 FROM ventas v 
                 JOIN clientes c ON v.clienteid = c.id 
-                ORDER BY v.fecha ASC 
+                ORDER BY v.fecha DESC 
                 LIMIT 5";
         $ventas = $con->query($sql);
 
@@ -107,10 +108,12 @@ require_once("class/DB.php");
                 echo $venta['nombre'] . " " . $venta['apellido'] . " — C.I: " . $venta['documento'] . "-" . $venta['numerodocumento'];
                 echo "</div>";
 
-                $sql_det = "SELECT p.nombre_producto, pr.precio, pr.iva, COUNT(*) as cantidad 
+                $sql_det = "SELECT p.nombre_producto, pr.precio, COALESCE(i.porcentaje, 16) as iva, COUNT(*) as cantidad 
                             FROM detalles_ventas dv 
                             JOIN precios pr ON dv.precioid = pr.id 
                             JOIN productos p ON pr.productoid = p.id 
+                            JOIN ventas v ON dv.ventaid = v.id 
+                            LEFT JOIN iva i ON v.iva_id = i.id 
                             WHERE dv.ventaid = ? 
                             GROUP BY pr.id 
                             ORDER BY p.nombre_producto ASC";
