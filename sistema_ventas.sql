@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.1
+-- version 5.2.1deb3
 -- https://www.phpmyadmin.net/
 --
--- Servidor: 127.0.0.1
--- Tiempo de generación: 05-05-2026 a las 01:48:59
--- Versión del servidor: 10.4.32-MariaDB
--- Versión de PHP: 8.2.12
+-- Servidor: localhost:3306
+-- Tiempo de generación: 06-05-2026 a las 01:59:55
+-- Versión del servidor: 10.11.14-MariaDB-0ubuntu0.24.04.1
+-- Versión de PHP: 8.3.6
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -20,8 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `sistema_ventas`
 --
-CREATE DATABASE IF NOT EXISTS `sistema_ventas` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-USE `sistema_ventas`;
 
 -- --------------------------------------------------------
 
@@ -39,10 +37,14 @@ CREATE TABLE `categorias_productos` (
 --
 
 INSERT INTO `categorias_productos` (`id`, `nombre_categoria`) VALUES
-(1, 'pupu de cabra'),
-(2, 'caca de caballo'),
-(3, 'manolo'),
-(4, 'baba de caballo');
+(1, 'Monitores'),
+(2, 'Teclados'),
+(3, 'Altavoces'),
+(4, 'Mouse'),
+(5, 'micrófonos'),
+(6, 'Audífonos '),
+(7, 'Tarjetas gráficas'),
+(8, 'Case PC');
 
 -- --------------------------------------------------------
 
@@ -60,6 +62,16 @@ CREATE TABLE `clientes` (
   `direccion` varchar(225) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `clientes`
+--
+
+INSERT INTO `clientes` (`id`, `documento`, `numerodocumento`, `nombre`, `apellido`, `telefono`, `direccion`) VALUES
+(1, 'V', '31279765', 'Francisco', 'Diaz', '04125052658', 'italia'),
+(2, 'V', '12211634', 'Roque', 'Feller', '04126325698', 'La limpia'),
+(3, 'V', '13628961', 'Carlos ', 'Sabaneta', '04126369854', 'Sector sabaneta'),
+(4, 'V', '30256987', 'Wisin', 'Yandel', '04126365214', 'Barquisimeto');
+
 -- --------------------------------------------------------
 
 --
@@ -71,6 +83,14 @@ CREATE TABLE `detalles_ventas` (
   `ventaid` int(11) NOT NULL,
   `precioid` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `detalles_ventas`
+--
+
+INSERT INTO `detalles_ventas` (`id`, `ventaid`, `precioid`) VALUES
+(1, 1, 27),
+(2, 2, 30);
 
 -- --------------------------------------------------------
 
@@ -90,9 +110,20 @@ CREATE TABLE `precios` (
 --
 
 INSERT INTO `precios` (`id`, `productoid`, `precio`, `iva`) VALUES
-(5, 6, 12.00, 16.00),
-(6, 7, 12.00, 16.00),
-(7, 8, 12.00, 16.00);
+(13, 15, 200.00, 16.00),
+(16, 18, 30.00, 16.00),
+(18, 1, 140.00, 16.00),
+(20, 3, 100.00, 16.00),
+(21, 4, 150.00, 16.00),
+(22, 5, 33.00, 16.00),
+(23, 6, 30.00, 16.00),
+(24, 7, 28.00, 16.00),
+(25, 8, 50.00, 16.00),
+(26, 9, 30.00, 16.00),
+(27, 10, 30.00, 16.00),
+(28, 11, 30.00, 16.00),
+(29, 12, 350.00, 16.00),
+(30, 13, 115.00, 16.00);
 
 -- --------------------------------------------------------
 
@@ -103,17 +134,27 @@ INSERT INTO `precios` (`id`, `productoid`, `precio`, `iva`) VALUES
 CREATE TABLE `productos` (
   `id` int(11) NOT NULL,
   `categoria_productoid` int(11) NOT NULL,
-  `nombre_producto` text NOT NULL
+  `nombre_producto` text NOT NULL,
+  `stock` int(11) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `productos`
 --
 
-INSERT INTO `productos` (`id`, `categoria_productoid`, `nombre_producto`) VALUES
-(6, 2, 'hola'),
-(7, 4, 'hola'),
-(8, 4, 'aaaaaa');
+INSERT INTO `productos` (`id`, `categoria_productoid`, `nombre_producto`, `stock`) VALUES
+(1, 1, 'Monitor curvo 32 pulgadas Samsung', 10),
+(3, 2, 'Teclado Gaming Razer Cynosa Chroma Rgb Back Lighting', 5),
+(4, 1, 'Monitor Gamer Msi 24 144hz Pro Mp243l E14 Full Hd Ips Hdmi', 10),
+(5, 3, 'Altavoces Gaming Onikuma L6 Rgb Bluetooth Pc Escritorio', 5),
+(6, 4, 'Mouse Logitech', 10),
+(7, 5, 'Microfono Gaming Onikuma M830 Condensador Usb Rgb', 20),
+(8, 6, 'Audifonos Fantech Tamago Ii Whg04 Bluetooth + Usb', 15),
+(9, 6, 'Audifonos Con Microfono Gaming Xtrikeme Gh-513w Bt + Usb', 30),
+(10, 6, 'Audifonos Gaming Con Rgb Supra-aurales, Gd900 Pro', 9),
+(11, 2, 'Teclado Gaming Mecanico Xtrike Me 61 Keys 60% Full Rgb', 15),
+(12, 7, 'Tarjeta Grafica Msi Gaming Geforce Rtx 3050 6gb Gddr6', 50),
+(13, 8, 'Case Msi Gaming Mag Force M100a 4xfan Rgb 120mm M-atx', 9);
 
 -- --------------------------------------------------------
 
@@ -124,17 +165,17 @@ INSERT INTO `productos` (`id`, `categoria_productoid`, `nombre_producto`) VALUES
 CREATE TABLE `usuarios` (
   `id` int(11) NOT NULL,
   `usuario` varchar(40) NOT NULL,
-  `contraseña` varchar(80) NOT NULL
+  `contraseña` varchar(80) NOT NULL,
+  `rol` tinyint(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `usuarios`
 --
 
-INSERT INTO `usuarios` (`id`, `usuario`, `contraseña`) VALUES
-(31, 'uwu', '$2y$10$YAMiJccOBU9qYr2OB8evruJkLtR3p0Lhzgeda/4RoB5.4LAgDgc76'),
-(32, 'mmm', '$2y$10$GxYWgXkbKnhsoUxOKG.EyeCYJG0DHF5ZUvbvJkhxKAu6PsWcpBI8a'),
-(33, 'owo', '$2y$10$Mv3cFVERi/XpyExXXK11fOkQYFBgADbme2YCVbXoEMR4SAO.XsC22');
+INSERT INTO `usuarios` (`id`, `usuario`, `contraseña`, `rol`) VALUES
+(1, 'ADMIN', '$2y$10$ka7vOeYOeVP72R7qRI988ugsLmpJeabeu44KOGFW42DurLVL/BV56', 1),
+(2, 'CAJAPRINCIPAL', '$2y$10$N2X5iz4Svm/oQ4kDYMjw..MdwJll9FFfdjXjaBUy6s9hzW.walWce', 0);
 
 -- --------------------------------------------------------
 
@@ -147,6 +188,14 @@ CREATE TABLE `ventas` (
   `fecha` date NOT NULL,
   `clienteid` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `ventas`
+--
+
+INSERT INTO `ventas` (`id`, `fecha`, `clienteid`) VALUES
+(1, '2026-05-05', 1),
+(2, '2026-05-05', 4);
 
 --
 -- Índices para tablas volcadas
@@ -207,43 +256,43 @@ ALTER TABLE `ventas`
 -- AUTO_INCREMENT de la tabla `categorias_productos`
 --
 ALTER TABLE `categorias_productos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de la tabla `clientes`
 --
 ALTER TABLE `clientes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `detalles_ventas`
 --
 ALTER TABLE `detalles_ventas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `precios`
 --
 ALTER TABLE `precios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT de la tabla `productos`
 --
 ALTER TABLE `productos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `ventas`
 --
 ALTER TABLE `ventas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Restricciones para tablas volcadas

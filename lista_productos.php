@@ -109,7 +109,7 @@ echo "<tr><th>Producto</th><th>Categoría</th><th>Stock</th><th>Precio</th><th>I
             }
             $stmt->close();
         } else {
-            $sql = "SELECT * FROM categorias_productos ORDER BY nombre_categoria ASC";
+            $sql = "SELECT * FROM categorias_productos ORDER BY nombre_categoria ASC LIMIT 5";
             $categorias = $con->query($sql);
             $hay_productos = false;
             
